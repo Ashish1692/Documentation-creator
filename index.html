@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,23 +16,22 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            background: #24242b;
             padding: 20px;
         }
 
         .container {
-            max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 450px 1fr;
             gap: 20px;
         }
 
         .toolbar {
-            background: white;
+            background: #1e1f29;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             height: fit-content;
             position: sticky;
             top: 20px;
@@ -39,7 +39,7 @@
 
         .toolbar h3 {
             margin-bottom: 15px;
-            color: #333;
+            color: #cfcece;
             font-size: 18px;
         }
 
@@ -48,20 +48,20 @@
         }
 
         .tag-section h4 {
-            font-size: 14px;
-            color: #666;
+            font-size: 12px;
+            color: #e4e4e4;
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .tag-btn {
-            display: block;
-            width: 100%;
+            display: inline-block;
+            width: fit-content;
             padding: 8px 12px;
             margin-bottom: 6px;
-            background: #007bff;
-            color: white;
+            background: #0763c5;
+            color: rgb(247, 247, 247);
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -70,7 +70,7 @@
         }
 
         .tag-btn:hover {
-            background: #0056b3;
+            box-shadow: 1px 1px 3px rgb(214, 214, 214);
         }
 
         .export-section {
@@ -79,20 +79,21 @@
             border-top: 2px solid #eee;
         }
 
-        .export-btn {
-            background: #28a745;
-            margin-bottom: 8px;
+        .export-section>h4 {
+            color: rgb(231, 231, 231);
+            margin-bottom: 10px;
         }
 
-        .export-btn:hover {
-            background: #218838;
+        .export-img:hover {
+            cursor: pointer;
+            filter: drop-shadow(2px 1px 2px rgb(219, 219, 219));
         }
 
         .editor-area {
-            background: white;
+            background: #1e1f29;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgb(95, 90, 90);
         }
 
         .controls {
@@ -102,16 +103,19 @@
             align-items: center;
         }
 
-        .controls select, .controls input {
+        .controls select,
+        .controls input {
+            color: rgb(231, 231, 231);
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #3b3b3f;
             border-radius: 4px;
             font-size: 14px;
+            background-color: #3b3b3f;
         }
 
         .controls button {
             padding: 8px 16px;
-            background: #dc3545;
+            background: #308b35;
             color: white;
             border: none;
             border-radius: 4px;
@@ -120,14 +124,14 @@
         }
 
         .controls button:hover {
-            background: #c82333;
+            background: #3eb343;
         }
 
         .page {
             background: white;
             margin: 0 auto 30px;
             padding: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             min-height: 400px;
             position: relative;
         }
@@ -140,6 +144,11 @@
         .page.letter {
             width: 8.5in;
             min-height: 11in;
+        }
+
+        .page.crown {
+            width: 300mm;
+            min-height: 500mm;
         }
 
         .page-number {
@@ -184,7 +193,8 @@
             color: #333;
         }
 
-        .editable-content ul, .editable-content ol {
+        .editable-content ul,
+        .editable-content ol {
             margin: 12px 0;
             padding-left: 30px;
         }
@@ -275,28 +285,23 @@
         }
 
         .add-page-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 12px 30px;
-            background: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
         }
 
         .add-page-btn:hover {
-            background: #138496;
+            filter: drop-shadow(2px 1px 2px rgb(219, 219, 219));
         }
 
         @media print {
             body {
                 background: white;
             }
-            .toolbar, .controls, .add-page-btn {
+
+            .toolbar,
+            .controls {
                 display: none;
             }
+
             .page {
                 box-shadow: none;
                 margin: 0;
@@ -305,11 +310,12 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="toolbar">
             <h3>HTML Tags</h3>
-            
+
             <div class="tag-section">
                 <h4>Headings</h4>
                 <button class="tag-btn" onclick="insertTag('h1', 'Heading 1')">H1</button>
@@ -348,8 +354,13 @@
 
             <div class="export-section">
                 <h4>Export</h4>
-                <button class="tag-btn export-btn" onclick="exportToPDF()">Export to PDF</button>
-                <button class="tag-btn export-btn" onclick="exportToImage()">Export to Image</button>
+                <div style=" display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-around;">
+                    <img title="Export to PDF" class="export-img" onclick="exportToPDF()" width="40" height="40"
+                        src="https://img.icons8.com/papercut/60/export-pdf.png" alt="export-pdf" />
+                    <img title="Export to IMG" class="export-img" onclick="exportToImage()" width="40" height="40"
+                        src="https://img.icons8.com/external-kiranshastry-lineal-color-kiranshastry/64/external-image-multimedia-kiranshastry-lineal-color-kiranshastry-4.png"
+                        alt="image-downloader" />
+                </div>
             </div>
         </div>
 
@@ -358,14 +369,17 @@
                 <select id="pageSize" onchange="changePageSize()">
                     <option value="a4">A4 (210 x 297mm)</option>
                     <option value="letter">Letter (8.5 x 11in)</option>
+                    <option value="crown">Crown size (300 x 500mm)</option>
                 </select>
                 <input type="text" id="pageTitle" placeholder="Document title..." style="flex: 1;">
-                <button onclick="clearAll()">Clear All</button>
+                <img title="Add new page" class="add-page-btn" width="40" height="40" src="https://img.icons8.com/fluency/50/add-file.png" alt="add-file"/>
             </div>
 
             <!-- Hidden file inputs -->
-            <input type="file" id="imageInput" class="file-input-wrapper" accept="image/*" onchange="handleImageUpload(event)">
-            <input type="file" id="videoInput" class="file-input-wrapper" accept="video/*" onchange="handleVideoUpload(event)">
+            <input type="file" id="imageInput" class="file-input-wrapper" accept="image/*"
+                onchange="handleImageUpload(event)">
+            <input type="file" id="videoInput" class="file-input-wrapper" accept="video/*"
+                onchange="handleVideoUpload(event)">
 
             <div id="pages-container">
                 <div class="page a4">
@@ -373,8 +387,6 @@
                     <div class="page-number">Page 1</div>
                 </div>
             </div>
-
-            <button class="add-page-btn" onclick="addNewPage()">+ Add New Page</button>
         </div>
     </div>
 
@@ -409,7 +421,7 @@
             const table = document.createElement('table');
             const thead = document.createElement('thead');
             const tbody = document.createElement('tbody');
-            
+
             const headerRow = document.createElement('tr');
             for (let i = 0; i < 3; i++) {
                 const th = document.createElement('th');
@@ -418,7 +430,7 @@
                 headerRow.appendChild(th);
             }
             thead.appendChild(headerRow);
-            
+
             for (let i = 0; i < 2; i++) {
                 const row = document.createElement('tr');
                 for (let j = 0; j < 3; j++) {
@@ -429,7 +441,7 @@
                 }
                 tbody.appendChild(row);
             }
-            
+
             table.appendChild(thead);
             table.appendChild(tbody);
             page.appendChild(table);
@@ -455,28 +467,28 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const page = document.getElementById(`page-${currentPage}`);
-                
+
                 const wrapper = document.createElement('div');
                 wrapper.className = 'media-wrapper';
-                
+
                 const img = document.createElement('img');
                 img.src = e.target.result;
                 img.alt = file.name;
-                
+
                 const caption = document.createElement('div');
                 caption.className = 'media-caption';
                 caption.contentEditable = true;
                 caption.textContent = 'Image caption (click to edit)';
-                
+
                 wrapper.appendChild(img);
                 wrapper.appendChild(caption);
                 page.appendChild(wrapper);
                 page.focus();
             };
             reader.readAsDataURL(file);
-            
+
             // Reset input
             event.target.value = '';
         }
@@ -486,28 +498,28 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const page = document.getElementById(`page-${currentPage}`);
-                
+
                 const wrapper = document.createElement('div');
                 wrapper.className = 'media-wrapper';
-                
+
                 const video = document.createElement('video');
                 video.src = e.target.result;
                 video.controls = true;
-                
+
                 const caption = document.createElement('div');
                 caption.className = 'media-caption';
                 caption.contentEditable = true;
                 caption.textContent = 'Video caption (click to edit)';
-                
+
                 wrapper.appendChild(video);
                 wrapper.appendChild(caption);
                 page.appendChild(wrapper);
                 page.focus();
             };
             reader.readAsDataURL(file);
-            
+
             // Reset input
             event.target.value = '';
         }
@@ -516,14 +528,14 @@
             pageCount++;
             const container = document.getElementById('pages-container');
             const pageSize = document.getElementById('pageSize').value;
-            
+
             const newPage = document.createElement('div');
             newPage.className = `page ${pageSize}`;
             newPage.innerHTML = `
                 <div class="editable-content" contenteditable="true" id="page-${pageCount}"></div>
                 <div class="page-number">Page ${pageCount}</div>
             `;
-            
+
             container.appendChild(newPage);
             currentPage = pageCount;
             document.getElementById(`page-${pageCount}`).focus();
@@ -556,7 +568,7 @@
             const pages = document.querySelectorAll('.page');
             const pageSize = document.getElementById('pageSize').value;
             const title = document.getElementById('pageTitle').value || 'document';
-            
+
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
@@ -565,34 +577,34 @@
 
             for (let i = 0; i < pages.length; i++) {
                 if (i > 0) pdf.addPage();
-                
+
                 const canvas = await html2canvas(pages[i], {
                     scale: 2,
                     useCORS: true,
                     logging: false
                 });
-                
+
                 const imgData = canvas.toDataURL('image/png');
                 const imgWidth = pageSize === 'a4' ? 210 : 216;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
+
                 pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
             }
-            
+
             pdf.save(`${title}.pdf`);
         }
 
         async function exportToImage() {
             const pages = document.querySelectorAll('.page');
             const title = document.getElementById('pageTitle').value || 'document';
-            
+
             for (let i = 0; i < pages.length; i++) {
                 const canvas = await html2canvas(pages[i], {
                     scale: 2,
                     useCORS: true,
                     logging: false
                 });
-                
+
                 const link = document.createElement('a');
                 link.download = `${title}-page-${i + 1}.png`;
                 link.href = canvas.toDataURL('image/png');
@@ -610,4 +622,5 @@
         });
     </script>
 </body>
+
 </html>
