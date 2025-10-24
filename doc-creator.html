@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Creator & Exporter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .toolbar h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .tag-section {
+            margin-bottom: 20px;
+        }
+
+        .tag-section h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-btn {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .tag-btn:hover {
+            background: #0056b3;
+        }
+
+        .export-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .export-btn {
+            background: #28a745;
+            margin-bottom: 8px;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+
+        .editor-area {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .controls select, .controls input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .controls button {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .controls button:hover {
+            background: #c82333;
+        }
+
+        .page {
+            background: white;
+            margin: 0 auto 30px;
+            padding: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-height: 400px;
+            position: relative;
+        }
+
+        .page.a4 {
+            width: 210mm;
+            min-height: 297mm;
+        }
+
+        .page.letter {
+            width: 8.5in;
+            min-height: 11in;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .editable-content {
+            min-height: 300px;
+            outline: none;
+        }
+
+        .editable-content:empty:before {
+            content: 'Click a tag button to add content...';
+            color: #999;
+        }
+
+        .editable-content h1 {
+            font-size: 28px;
+            margin: 20px 0;
+            color: #222;
+        }
+
+        .editable-content h2 {
+            font-size: 24px;
+            margin: 18px 0;
+            color: #333;
+        }
+
+        .editable-content h3 {
+            font-size: 20px;
+            margin: 16px 0;
+            color: #444;
+        }
+
+        .editable-content p {
+            margin: 12px 0;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .editable-content ul, .editable-content ol {
+            margin: 12px 0;
+            padding-left: 30px;
+        }
+
+        .editable-content li {
+            margin: 6px 0;
+            line-height: 1.6;
+        }
+
+        .editable-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .editable-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .editable-content blockquote {
+            border-left: 4px solid #007bff;
+            padding-left: 20px;
+            margin: 12px 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        .editable-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        .editable-content table th,
+        .editable-content table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .editable-content table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .editable-content hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 2px solid #eee;
+        }
+
+        .editable-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .editable-content video {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .media-wrapper {
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .media-caption {
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .file-input-wrapper {
+            display: none;
+        }
+
+        .add-page-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 30px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-page-btn:hover {
+            background: #138496;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .toolbar, .controls, .add-page-btn {
+                display: none;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <h3>HTML Tags</h3>
+            
+            <div class="tag-section">
+                <h4>Headings</h4>
+                <button class="tag-btn" onclick="insertTag('h1', 'Heading 1')">H1</button>
+                <button class="tag-btn" onclick="insertTag('h2', 'Heading 2')">H2</button>
+                <button class="tag-btn" onclick="insertTag('h3', 'Heading 3')">H3</button>
+            </div>
+
+            <div class="tag-section">
+                <h4>Text</h4>
+                <button class="tag-btn" onclick="insertTag('p', 'Paragraph text')">Paragraph</button>
+                <button class="tag-btn" onclick="insertTag('strong', 'Bold text')">Bold</button>
+                <button class="tag-btn" onclick="insertTag('em', 'Italic text')">Italic</button>
+                <button class="tag-btn" onclick="insertTag('u', 'Underlined text')">Underline</button>
+                <button class="tag-btn" onclick="insertTag('code', 'code snippet')">Code</button>
+            </div>
+
+            <div class="tag-section">
+                <h4>Lists</h4>
+                <button class="tag-btn" onclick="insertList('ul')">Unordered List</button>
+                <button class="tag-btn" onclick="insertList('ol')">Ordered List</button>
+            </div>
+
+            <div class="tag-section">
+                <h4>Media</h4>
+                <button class="tag-btn" onclick="insertImage()">Image</button>
+                <button class="tag-btn" onclick="insertVideo()">Video</button>
+            </div>
+
+            <div class="tag-section">
+                <h4>Other</h4>
+                <button class="tag-btn" onclick="insertTag('blockquote', 'Quote text')">Blockquote</button>
+                <button class="tag-btn" onclick="insertTag('pre', 'Code block')">Code Block</button>
+                <button class="tag-btn" onclick="insertTable()">Table</button>
+                <button class="tag-btn" onclick="insertHr()">Horizontal Line</button>
+            </div>
+
+            <div class="export-section">
+                <h4>Export</h4>
+                <button class="tag-btn export-btn" onclick="exportToPDF()">Export to PDF</button>
+                <button class="tag-btn export-btn" onclick="exportToImage()">Export to Image</button>
+            </div>
+        </div>
+
+        <div class="editor-area">
+            <div class="controls">
+                <select id="pageSize" onchange="changePageSize()">
+                    <option value="a4">A4 (210 x 297mm)</option>
+                    <option value="letter">Letter (8.5 x 11in)</option>
+                </select>
+                <input type="text" id="pageTitle" placeholder="Document title..." style="flex: 1;">
+                <button onclick="clearAll()">Clear All</button>
+            </div>
+
+            <!-- Hidden file inputs -->
+            <input type="file" id="imageInput" class="file-input-wrapper" accept="image/*" onchange="handleImageUpload(event)">
+            <input type="file" id="videoInput" class="file-input-wrapper" accept="video/*" onchange="handleVideoUpload(event)">
+
+            <div id="pages-container">
+                <div class="page a4">
+                    <div class="editable-content" contenteditable="true" id="page-1"></div>
+                    <div class="page-number">Page 1</div>
+                </div>
+            </div>
+
+            <button class="add-page-btn" onclick="addNewPage()">+ Add New Page</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let pageCount = 1;
+
+        function insertTag(tag, placeholder) {
+            const page = document.getElementById(`page-${currentPage}`);
+            const element = document.createElement(tag);
+            element.textContent = placeholder;
+            element.contentEditable = true;
+            page.appendChild(element);
+            page.focus();
+        }
+
+        function insertList(type) {
+            const page = document.getElementById(`page-${currentPage}`);
+            const list = document.createElement(type);
+            for (let i = 0; i < 3; i++) {
+                const li = document.createElement('li');
+                li.textContent = `List item ${i + 1}`;
+                li.contentEditable = true;
+                list.appendChild(li);
+            }
+            page.appendChild(list);
+            page.focus();
+        }
+
+        function insertTable() {
+            const page = document.getElementById(`page-${currentPage}`);
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+            
+            const headerRow = document.createElement('tr');
+            for (let i = 0; i < 3; i++) {
+                const th = document.createElement('th');
+                th.textContent = `Header ${i + 1}`;
+                th.contentEditable = true;
+                headerRow.appendChild(th);
+            }
+            thead.appendChild(headerRow);
+            
+            for (let i = 0; i < 2; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < 3; j++) {
+                    const td = document.createElement('td');
+                    td.textContent = `Cell ${i + 1}-${j + 1}`;
+                    td.contentEditable = true;
+                    row.appendChild(td);
+                }
+                tbody.appendChild(row);
+            }
+            
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            page.appendChild(table);
+            page.focus();
+        }
+
+        function insertHr() {
+            const page = document.getElementById(`page-${currentPage}`);
+            const hr = document.createElement('hr');
+            page.appendChild(hr);
+        }
+
+        function insertImage() {
+            document.getElementById('imageInput').click();
+        }
+
+        function insertVideo() {
+            document.getElementById('videoInput').click();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const page = document.getElementById(`page-${currentPage}`);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-wrapper';
+                
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = file.name;
+                
+                const caption = document.createElement('div');
+                caption.className = 'media-caption';
+                caption.contentEditable = true;
+                caption.textContent = 'Image caption (click to edit)';
+                
+                wrapper.appendChild(img);
+                wrapper.appendChild(caption);
+                page.appendChild(wrapper);
+                page.focus();
+            };
+            reader.readAsDataURL(file);
+            
+            // Reset input
+            event.target.value = '';
+        }
+
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const page = document.getElementById(`page-${currentPage}`);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-wrapper';
+                
+                const video = document.createElement('video');
+                video.src = e.target.result;
+                video.controls = true;
+                
+                const caption = document.createElement('div');
+                caption.className = 'media-caption';
+                caption.contentEditable = true;
+                caption.textContent = 'Video caption (click to edit)';
+                
+                wrapper.appendChild(video);
+                wrapper.appendChild(caption);
+                page.appendChild(wrapper);
+                page.focus();
+            };
+            reader.readAsDataURL(file);
+            
+            // Reset input
+            event.target.value = '';
+        }
+
+        function addNewPage() {
+            pageCount++;
+            const container = document.getElementById('pages-container');
+            const pageSize = document.getElementById('pageSize').value;
+            
+            const newPage = document.createElement('div');
+            newPage.className = `page ${pageSize}`;
+            newPage.innerHTML = `
+                <div class="editable-content" contenteditable="true" id="page-${pageCount}"></div>
+                <div class="page-number">Page ${pageCount}</div>
+            `;
+            
+            container.appendChild(newPage);
+            currentPage = pageCount;
+            document.getElementById(`page-${pageCount}`).focus();
+        }
+
+        function changePageSize() {
+            const pageSize = document.getElementById('pageSize').value;
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.className = `page ${pageSize}`;
+            });
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all content?')) {
+                const container = document.getElementById('pages-container');
+                container.innerHTML = `
+                    <div class="page a4">
+                        <div class="editable-content" contenteditable="true" id="page-1"></div>
+                        <div class="page-number">Page 1</div>
+                    </div>
+                `;
+                currentPage = 1;
+                pageCount = 1;
+            }
+        }
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const pages = document.querySelectorAll('.page');
+            const pageSize = document.getElementById('pageSize').value;
+            const title = document.getElementById('pageTitle').value || 'document';
+            
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: pageSize
+            });
+
+            for (let i = 0; i < pages.length; i++) {
+                if (i > 0) pdf.addPage();
+                
+                const canvas = await html2canvas(pages[i], {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = pageSize === 'a4' ? 210 : 216;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            }
+            
+            pdf.save(`${title}.pdf`);
+        }
+
+        async function exportToImage() {
+            const pages = document.querySelectorAll('.page');
+            const title = document.getElementById('pageTitle').value || 'document';
+            
+            for (let i = 0; i < pages.length; i++) {
+                const canvas = await html2canvas(pages[i], {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+                
+                const link = document.createElement('a');
+                link.download = `${title}-page-${i + 1}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        // Track which page is being edited
+        document.addEventListener('click', (e) => {
+            const page = e.target.closest('.page');
+            if (page) {
+                const pageId = page.querySelector('.editable-content').id;
+                currentPage = parseInt(pageId.split('-')[1]);
+            }
+        });
+    </script>
+</body>
+</html>
