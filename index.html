@@ -352,8 +352,47 @@
                 <button class="tag-btn" onclick="insertHr()">Horizontal Line</button>
             </div>
 
+            <div class="tag-section">
+                <h4>Formating</h4>
+                <select class="tag-btn" id="fontFamily" onchange="applyStyle('fontFamily', this.value)">
+                    <option value="">Font Family</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Verdana">Verdana</option>
+                </select>
+
+                <select class="tag-btn" id="fontSize" onchange="applyStyle('fontSize', this.value)">
+                    <option value="">Font Size</option>
+                    <option value="12px">12</option>
+                    <option value="14px">14</option>
+                    <option value="16px">16</option>
+                    <option value="18px">18</option>
+                    <option value="20px">20</option>
+                    <option value="24px">24</option>
+                    <option value="32px">32</option>
+                    <option value="48px">48</option>
+                    <option value="64px">64</option>
+                    <option value="120px">120</option>
+
+                </select>
+
+
+                <button class="tag-btn" onclick="applyStyle('bold')"><b>B</b></button>
+                <button class="tag-btn" onclick="applyStyle('italic')"><i>I</i></button>
+                <button class="tag-btn" onclick="applyStyle('underline')"><u>U</u></button>
+            </div>
+            <div class="tag-section">
+                <h4>Color</h4>
+                <label style="color: white; font-size: 14px;">Text Color: </label>
+                <input type="color" id="fontColor" title="Text Color" onchange="applyStyle('color', this.value)">
+                <label style="color: white; font-size: 14px;">Background: </label>
+                <input type="color" id="bgColor" title="Background Color"
+                    onchange="applyStyle('backgroundColor', this.value)">
+            </div>
+
             <div class="export-section">
-                <h4>Export</h4>
                 <div style=" display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-around;">
                     <img title="Export to PDF" class="export-img" onclick="exportToPDF()" width="40" height="40"
                         src="https://img.icons8.com/papercut/60/export-pdf.png" alt="export-pdf" />
@@ -372,7 +411,8 @@
                     <option value="crown">Crown size (300 x 500mm)</option>
                 </select>
                 <input type="text" id="pageTitle" placeholder="Document title..." style="flex: 1;">
-                <img title="Add new page" class="add-page-btn" width="40" height="40" onclick="addNewPage()" src="https://img.icons8.com/fluency/50/add-file.png" alt="add-file"/>
+                <img title="Add new page" class="add-page-btn" onclick="addNewPage()" width="40" height="40"
+                    src="https://img.icons8.com/fluency/50/add-file.png" alt="add-file" />
             </div>
 
             <!-- Hidden file inputs -->
@@ -391,6 +431,52 @@
     </div>
 
     <script>
+
+
+        function applyStyle(style, value) {
+            document.execCommand('styleWithCSS', false, true);
+
+            switch (style) {
+                case 'bold':
+                    document.execCommand('bold');
+                    break;
+                case 'italic':
+                    document.execCommand('italic');
+                    break;
+                case 'underline':
+                    document.execCommand('underline');
+                    break;
+                case 'fontFamily':
+                    if (value) document.execCommand('fontName', false, value);
+                    break;
+                case 'fontSize':
+                    if (value) document.execCommand('fontSize', false, 7); // temporary size
+                    document.querySelectorAll('font[size="7"]').forEach(el => el.removeAttribute('size'));
+                    document.querySelectorAll('font').forEach(el => el.style.fontSize = value);
+                    break;
+                case 'color':
+                    document.execCommand('foreColor', false, value);
+                    break;
+                case 'backgroundColor':
+                    document.execCommand('hiliteColor', false, value);
+                    break;
+            }
+        }
+
+        // Update page width/height manually
+        function updatePageSize() {
+            const width = document.getElementById('pageWidth').value;
+            const height = document.getElementById('pageHeight').value;
+            const pages = document.querySelectorAll('.page');
+
+            pages.forEach(page => {
+                page.style.width = width + 'mm';
+                page.style.minHeight = height + 'mm';
+            });
+        }
+
+
+
         let currentPage = 1;
         let pageCount = 1;
 
