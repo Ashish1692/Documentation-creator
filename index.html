@@ -7,6 +7,8 @@
     <title>Documentation Creator & Exporter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
     <style>
         * {
             margin: 0;
@@ -16,19 +18,19 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #24242b;
+            background: #171820;
             padding: 20px;
         }
 
         .container {
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 450px 1fr;
+            grid-template-columns: auto 19%;
             gap: 20px;
         }
 
         .toolbar {
-            background: #1e1f29;
+            background: #1b1d2e;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -56,10 +58,10 @@
         }
 
         .tag-btn {
-            display: inline-block;
+            display: inline;
             width: fit-content;
             padding: 8px 12px;
-            margin-bottom: 6px;
+            margin: 4px 4px 4px 0;
             background: #0763c5;
             color: rgb(247, 247, 247);
             border: none;
@@ -90,27 +92,32 @@
         }
 
         .editor-area {
-            background: #1e1f29;
+            background: #282829;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgb(95, 90, 90);
+            /* box-shadow: 0 2px 8px rgb(95, 90, 90); */
         }
 
         .controls {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin: 20px 0 0 0;
             align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .controls>* {
+            width: 100%;
         }
 
         .controls select,
         .controls input {
             color: rgb(231, 231, 231);
             padding: 8px 12px;
-            border: 1px solid #3b3b3f;
+            border: 1px solid #353544;
             border-radius: 4px;
             font-size: 14px;
-            background-color: #3b3b3f;
+            background-color: #1b1d2e;
         }
 
         .controls button {
@@ -161,10 +168,7 @@
 
         .editable-content {
             width: 100%;
-            height: calc(100% - 60px);
-            /* fills most of the page space */
-            overflow: hidden;
-            /* prevent scrollbars */
+            min-height: calc(100% - 60px);
             outline: none;
             display: block;
         }
@@ -316,6 +320,70 @@
             background: #c9302c;
         }
 
+        .editable-content a {
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .editable-content a:hover {
+            color: #0056b3;
+        }
+
+        #code-editor-container {
+            display: none;
+            height: 600px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #code-editor-container.active {
+            display: block;
+        }
+
+        #pages-container.hidden {
+            display: none;
+        }
+
+        .editor-tabs {
+            display: none;
+            background: #2d2d30;
+            padding: 10px 20px;
+            gap: 10px;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: -1px;
+        }
+
+        .editor-tabs.active {
+            display: flex;
+        }
+
+        .editor-tab {
+            padding: 8px 16px;
+            background: #1e1f29;
+            color: #ccc;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .editor-tab.active {
+            background: #1e1e1e;
+            color: #fff;
+        }
+
+        .editor-tab:hover {
+            background: #252526;
+        }
+
+        .bi {
+            font-size: 1rem;
+            /* color: cornflowerblue; */
+        }
 
         @media print {
             body {
@@ -334,113 +402,19 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 </head>
 
 <body>
     <div class="container">
-        <div class="toolbar">
-            <h3>HTML Tags</h3>
-
-            <div class="tag-section">
-                <h4>Headings</h4>
-                <button class="tag-btn" onclick="insertTag('h1', 'Heading 1')">H1</button>
-                <button class="tag-btn" onclick="insertTag('h2', 'Heading 2')">H2</button>
-                <button class="tag-btn" onclick="insertTag('h3', 'Heading 3')">H3</button>
-            </div>
-
-            <div class="tag-section">
-                <h4>Text</h4>
-                <button class="tag-btn" onclick="insertTag('p', 'Paragraph text')">Paragraph</button>
-                <button class="tag-btn" onclick="insertTag('strong', 'Bold text')">Bold</button>
-                <button class="tag-btn" onclick="insertTag('em', 'Italic text')">Italic</button>
-                <button class="tag-btn" onclick="insertTag('u', 'Underlined text')">Underline</button>
-                <button class="tag-btn" onclick="insertTag('code', 'code snippet')">Code</button>
-            </div>
-
-            <div class="tag-section">
-                <h4>Lists</h4>
-                <button class="tag-btn" onclick="insertList('ul')">Unordered List</button>
-                <button class="tag-btn" onclick="insertList('ol')">Ordered List</button>
-            </div>
-
-            <div class="tag-section">
-                <h4>Media</h4>
-                <button class="tag-btn" onclick="insertImage()">Image</button>
-                <button class="tag-btn" onclick="insertVideo()">Video</button>
-            </div>
-
-            <div class="tag-section">
-                <h4>Other</h4>
-                <button class="tag-btn" onclick="insertTag('blockquote', 'Quote text')">Blockquote</button>
-                <button class="tag-btn" onclick="insertTag('pre', 'Code block')">Code Block</button>
-                <button class="tag-btn" onclick="insertTable()">Table</button>
-                <button class="tag-btn" onclick="insertHr()">Horizontal Line</button>
-            </div>
-
-            <div class="tag-section">
-                <h4>Formating</h4>
-                <select class="tag-btn" id="fontFamily" onchange="applyStyle('fontFamily', this.value)">
-                    <option value="">Font Family</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Courier New">Courier New</option>
-                    <option value="Verdana">Verdana</option>
-                </select>
-
-                <select class="tag-btn" id="fontSize" onchange="applyStyle('fontSize', this.value)">
-                    <option value="">Font Size</option>
-                    <option value="12px">12</option>
-                    <option value="14px">14</option>
-                    <option value="16px">16</option>
-                    <option value="18px">18</option>
-                    <option value="20px">20</option>
-                    <option value="24px">24</option>
-                    <option value="32px">32</option>
-                    <option value="48px">48</option>
-                    <option value="64px">64</option>
-                    <option value="120px">120</option>
-
-                </select>
-
-
-                <button class="tag-btn" onclick="applyStyle('bold')"><b>B</b></button>
-                <button class="tag-btn" onclick="applyStyle('italic')"><i>I</i></button>
-                <button class="tag-btn" onclick="applyStyle('underline')"><u>U</u></button>
-            </div>
-            <div class="tag-section">
-                <h4>Color</h4>
-                <label style="color: white; font-size: 14px;">Text Color: </label>
-                <input type="color" id="fontColor" title="Text Color" onchange="applyStyle('color', this.value)">
-                <label style="color: white; font-size: 14px;">Background: </label>
-                <input type="color" id="bgColor" title="Background Color"
-                    onchange="applyStyle('backgroundColor', this.value)">
-            </div>
-
-            <div class="export-section">
-                <div style=" display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-around;">
-                    <img title="Export to PDF" class="export-img" onclick="exportToPDF()" width="40" height="40"
-                        src="https://img.icons8.com/papercut/60/export-pdf.png" alt="export-pdf" />
-                    <img title="Export to IMG" class="export-img" onclick="exportToImage()" width="40" height="40"
-                        src="https://img.icons8.com/external-kiranshastry-lineal-color-kiranshastry/64/external-image-multimedia-kiranshastry-lineal-color-kiranshastry-4.png"
-                        alt="image-downloader" />
-                </div>
-            </div>
-        </div>
-
         <div class="editor-area">
-            <div class="controls">
-                <select id="pageSize" onchange="changePageSize()">
-                    <option value="a4">A4 (210 x 297mm)</option>
-                    <option value="letter">Letter (8.5 x 11in)</option>
-                    <option value="crown">Crown size (300 x 500mm)</option>
-                </select>
-                <input type="text" id="pageTitle" placeholder="Document title..." style="flex: 1;">
-                <img title="Add new page" class="add-page-btn" onclick="addNewPage()" width="40" height="40"
-                    src="https://img.icons8.com/fluency/50/add-file.png" alt="add-file" />
+
+            <div class="editor-tabs" id="editorTabs">
+                <button class="editor-tab active" data-page="1" onclick="switchToPage(1)">Page 1</button>
             </div>
 
-            <!-- Hidden file inputs -->
+            <div id="code-editor-container"></div>
+
             <input type="file" id="imageInput" class="file-input-wrapper" accept="image/*"
                 onchange="handleImageUpload(event)">
             <input type="file" id="videoInput" class="file-input-wrapper" accept="video/*"
@@ -452,17 +426,183 @@
                         <div class="editable-content" contenteditable="true" id="page-1"></div>
                         <div class="page-number">Page 1</div>
                     </div>
-                    <!-- No delete button for first page -->
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div>
+                <h3>Editing Tools</h3>
+
+                <div class="tag-section">
+
+                    <button class="tag-btn" onclick="insertTag('h1', 'Heading 1')">H1</button>
+                    <button class="tag-btn" onclick="insertTag('h2', 'Heading 2')">H2</button>
+                    <button class="tag-btn" onclick="insertTag('h3', 'Heading 3')">H3</button>
+
+
+                    <button class="tag-btn" onclick="insertTag('p', 'Paragraph text')"><i
+                            class="bi bi-text-paragraph"></i></button>
+                    <button class="tag-btn" onclick="insertLink()"><i class="bi bi-link-45deg"></i></button>
+
+                    <button class="tag-btn" onclick="insertList('ul')"><i class="bi bi-list-ul"></i></button>
+                    <button class="tag-btn" onclick="insertList('ol')"><i class="bi bi-list-ol"></i></button>
+
+                    <button class="tag-btn" onclick="insertImage()"><i class="bi bi-card-image"></i></button>
+                    <button class="tag-btn" onclick="insertVideo()"><i class="bi bi-film"></i></button>
+
+                    <button class="tag-btn" onclick="insertTag('blockquote', 'Quote text')"><i
+                            class="bi bi-quote"></i></button>
+                    <button class="tag-btn" onclick="insertTag('pre', 'Code block')"><i
+                            class="bi bi-code-square"></i></button>
+                    <button class="tag-btn" onclick="insertTable()"><i class="bi bi-table"></i></button>
+                    <button class="tag-btn" onclick="insertHr()"><i class="bi bi-hr"></i></button>
+                </div>
+
+                <div class="tag-section">
+                    <h4>Formatting</h4>
+                    <select class="tag-btn" id="fontFamily" onchange="applyStyle('fontFamily', this.value)">
+                        <option value="">Font Family</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                    </select>
+
+                    <select class="tag-btn" id="fontSize" onchange="applyStyle('fontSize', this.value)">
+                        <option value="">Font Size</option>
+                        <option value="12px">12</option>
+                        <option value="14px">14</option>
+                        <option value="16px">16</option>
+                        <option value="18px">18</option>
+                        <option value="20px">20</option>
+                        <option value="24px">24</option>
+                        <option value="32px">32</option>
+                        <option value="48px">48</option>
+                        <option value="64px">64</option>
+                        <option value="120px">120</option>
+                    </select>
+
+                    <button class="tag-btn" onclick="applyStyle('bold')"><b>B</b></button>
+                    <button class="tag-btn" onclick="applyStyle('italic')"><i>I</i></button>
+                    <button class="tag-btn" onclick="applyStyle('underline')"><u>U</u></button>
+                </div>
+
+                <div class="tag-section">
+                    <label style="color: white; font-size: 14px;">Text: </label>
+                    <input type="color" id="fontColor" title="Text Color" onchange="applyStyle('color', this.value)">
+                    <label style="color: white; font-size: 14px;">Background: </label>
+                    <input type="color" id="bgColor" title="Background Color"
+                        onchange="applyStyle('backgroundColor', this.value)">
+                </div>
+            </div>
+            <hr>
+            <div class="controls">
+                <select id="pageSize" onchange="changePageSize()">
+                    <option value="a4">A4 (210 x 297mm)</option>
+                    <option value="letter">Letter (8.5 x 11in)</option>
+                    <option value="crown">Crown (300 x 500mm)</option>
+                </select>
+                <input type="text" id="pageTitle" placeholder="Document title..." style="flex: 1;">
+                <button id="toggleCodeBtn" onclick="toggleCodeView()" style="background:#6c63ff;">Code View</button>
+                <hr>
+                <div class="">
+                    <div
+                        style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-around; column-gap: 4px; align-items: center;">
+                        <img title="Add new page" class="add-page-btn" onclick="addNewPage()" width="40" height="40"
+                            src="https://img.icons8.com/fluency/50/add-file.png" alt="add-file" />
+                        <img title="Export to PDF" class="export-img" onclick="exportToPDF()" width="40" height="40"
+                            src="https://img.icons8.com/papercut/60/export-pdf.png" alt="export-pdf" />
+                        <img title="Export to IMG" class="export-img" onclick="exportToImage()" width="40" height="40"
+                            src="https://img.icons8.com/external-kiranshastry-lineal-color-kiranshastry/64/external-image-multimedia-kiranshastry-lineal-color-kiranshastry-4.png"
+                            alt="image-downloader" />
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <script>
 
+    <script>
+        let currentPage = 1;
+        let pageCount = 1;
+        let monacoEditor = null;
+        let isCodeView = false;
+
+        // Initialize Monaco Editor
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+        require(['vs/editor/editor.main'], function () {
+            monacoEditor = monaco.editor.create(document.getElementById('code-editor-container'), {
+                value: '',
+                language: 'html',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: true },
+                fontSize: 14,
+                wordWrap: 'on',
+                formatOnPaste: true,
+                formatOnType: true
+            });
+        });
+
+        function toggleCodeView() {
+            isCodeView = !isCodeView;
+            const codeContainer = document.getElementById('code-editor-container');
+            const pagesContainer = document.getElementById('pages-container');
+            const toggleBtn = document.getElementById('toggleCodeBtn');
+            const editorTabs = document.getElementById('editorTabs');
+
+            if (isCodeView) {
+                // Switch to code view
+                const pageContent = document.getElementById(`page-${currentPage}`).innerHTML;
+                monacoEditor.setValue(pageContent);
+                codeContainer.classList.add('active');
+                pagesContainer.classList.add('hidden');
+                editorTabs.classList.add('active');
+                toggleBtn.textContent = 'Visual View';
+                toggleBtn.style.background = '#ff8c00';
+            } else {
+                // Switch to visual view
+                const code = monacoEditor.getValue();
+                document.getElementById(`page-${currentPage}`).innerHTML = code;
+                codeContainer.classList.remove('active');
+                pagesContainer.classList.remove('hidden');
+                editorTabs.classList.remove('active');
+                toggleBtn.textContent = 'Code View';
+                toggleBtn.style.background = '#6c63ff';
+            }
+        }
+
+        function switchToPage(pageNum) {
+            if (isCodeView) {
+                // Save current page code before switching
+                const code = monacoEditor.getValue();
+                document.getElementById(`page-${currentPage}`).innerHTML = code;
+            }
+
+            currentPage = pageNum;
+
+            // Update tab active state
+            document.querySelectorAll('.editor-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (parseInt(tab.dataset.page) === pageNum) {
+                    tab.classList.add('active');
+                }
+            });
+
+            if (isCodeView) {
+                // Load new page code
+                const pageContent = document.getElementById(`page-${currentPage}`).innerHTML;
+                monacoEditor.setValue(pageContent);
+            }
+        }
 
         function applyStyle(style, value) {
+            if (isCodeView) return;
+
             document.execCommand('styleWithCSS', false, true);
 
             switch (style) {
@@ -479,9 +619,13 @@
                     if (value) document.execCommand('fontName', false, value);
                     break;
                 case 'fontSize':
-                    if (value) document.execCommand('fontSize', false, 7); // temporary size
-                    document.querySelectorAll('font[size="7"]').forEach(el => el.removeAttribute('size'));
-                    document.querySelectorAll('font').forEach(el => el.style.fontSize = value);
+                    if (value) {
+                        document.execCommand('fontSize', false, 7);
+                        document.querySelectorAll('font[size="7"]').forEach(el => {
+                            el.removeAttribute('size');
+                            el.style.fontSize = value;
+                        });
+                    }
                     break;
                 case 'color':
                     document.execCommand('foreColor', false, value);
@@ -492,33 +636,88 @@
             }
         }
 
-        // Update page width/height manually
-        function updatePageSize() {
-            const width = document.getElementById('pageWidth').value;
-            const height = document.getElementById('pageHeight').value;
-            const pages = document.querySelectorAll('.page');
+        let lastSelection = null;
 
-            pages.forEach(page => {
-                page.style.width = width + 'mm';
-                page.style.minHeight = height + 'mm';
+        // Track cursor position whenever user interacts with content
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('selectionchange', function() {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const container = range.commonAncestorContainer;
+                    
+                    // Check if selection is within an editable content area
+                    let editableParent = container.nodeType === 3 ? container.parentNode : container;
+                    while (editableParent && !editableParent.classList?.contains('editable-content')) {
+                        editableParent = editableParent.parentNode;
+                    }
+                    
+                    if (editableParent) {
+                        lastSelection = range.cloneRange();
+                        // Update current page based on which editable content is focused
+                        const pageId = editableParent.id;
+                        const pageNum = parseInt(pageId.split('-')[1]);
+                        if (!isNaN(pageNum)) {
+                            currentPage = pageNum;
+                        }
+                    }
+                }
             });
+        });
+
+        function restoreSelection() {
+            if (lastSelection) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(lastSelection);
+                return true;
+            }
+            return false;
         }
 
-
-
-        let currentPage = 1;
-        let pageCount = 1;
-
-        function insertTag(tag, placeholder) {
+        function insertAtCursor(element) {
             const page = document.getElementById(`page-${currentPage}`);
-            const element = document.createElement(tag);
-            element.textContent = placeholder;
-            element.contentEditable = true;
+            
+            // Try to restore the last selection
+            if (restoreSelection()) {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    range.deleteContents();
+                    range.insertNode(element);
+                    
+                    // Move cursor after the inserted element
+                    range.setStartAfter(element);
+                    range.setEndAfter(element);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    
+                    // Focus the page
+                    page.focus();
+                    return;
+                }
+            }
+            
+            // Fallback: append to page
             page.appendChild(element);
             page.focus();
         }
 
+        function insertTag(tag, placeholder) {
+            if (isCodeView) return;
+
+            const page = document.getElementById(`page-${currentPage}`);
+            const element = document.createElement(tag);
+            element.textContent = placeholder;
+            element.contentEditable = true;
+            // page.appendChild(element);
+            insertAtCursor(element);
+            page.focus();
+        }
+
         function insertList(type) {
+            if (isCodeView) return;
+
             const page = document.getElementById(`page-${currentPage}`);
             const list = document.createElement(type);
             for (let i = 0; i < 3; i++) {
@@ -527,11 +726,14 @@
                 li.contentEditable = true;
                 list.appendChild(li);
             }
-            page.appendChild(list);
+            // page.appendChild(list);
+            insertAtCursor(list);
             page.focus();
         }
 
         function insertTable() {
+            if (isCodeView) return;
+
             const page = document.getElementById(`page-${currentPage}`);
             const table = document.createElement('table');
             const thead = document.createElement('thead');
@@ -559,21 +761,43 @@
 
             table.appendChild(thead);
             table.appendChild(tbody);
-            page.appendChild(table);
+            // page.appendChild(table);
+            insertAtCursor(table);
             page.focus();
         }
 
         function insertHr() {
+            if (isCodeView) return;
+
             const page = document.getElementById(`page-${currentPage}`);
             const hr = document.createElement('hr');
-            page.appendChild(hr);
+            // page.appendChild(hr);
+            insertAtCursor(hr);
+        }
+
+        function insertLink() {
+            if (isCodeView) return;
+
+            const url = prompt('Enter URL:');
+            const text = prompt('Enter link text:');
+            if (url && text) {
+                const page = document.getElementById(`page-${currentPage}`);
+                const link = document.createElement('a');
+                link.href = url;
+                link.textContent = text;
+                link.target = '_blank';
+                // page.appendChild(link);
+                insertAtCursor(link);
+            }
         }
 
         function insertImage() {
+            if (isCodeView) return;
             document.getElementById('imageInput').click();
         }
 
         function insertVideo() {
+            if (isCodeView) return;
             document.getElementById('videoInput').click();
         }
 
@@ -584,7 +808,6 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 const page = document.getElementById(`page-${currentPage}`);
-
                 const wrapper = document.createElement('div');
                 wrapper.className = 'media-wrapper';
 
@@ -595,16 +818,14 @@
                 const caption = document.createElement('div');
                 caption.className = 'media-caption';
                 caption.contentEditable = true;
-                caption.textContent = 'Image caption (click to edit)';
+                caption.textContent = 'Add a caption...';
 
                 wrapper.appendChild(img);
                 wrapper.appendChild(caption);
-                page.appendChild(wrapper);
-                page.focus();
+                // page.appendChild(wrapper);
+                insertAtCursor(wrapper);
             };
             reader.readAsDataURL(file);
-
-            // Reset input
             event.target.value = '';
         }
 
@@ -615,7 +836,6 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 const page = document.getElementById(`page-${currentPage}`);
-
                 const wrapper = document.createElement('div');
                 wrapper.className = 'media-wrapper';
 
@@ -626,35 +846,16 @@
                 const caption = document.createElement('div');
                 caption.className = 'media-caption';
                 caption.contentEditable = true;
-                caption.textContent = 'Video caption (click to edit)';
+                caption.textContent = 'Add a caption...';
 
                 wrapper.appendChild(video);
                 wrapper.appendChild(caption);
-                page.appendChild(wrapper);
-                page.focus();
+                // page.appendChild(wrapper);
+                insertAtCursor(wrapper);
             };
             reader.readAsDataURL(file);
-
-            // Reset input
             event.target.value = '';
         }
-
-        // function addNewPage() {
-        //     pageCount++;
-        //     const container = document.getElementById('pages-container');
-        //     const pageSize = document.getElementById('pageSize').value;
-
-        //     const newPage = document.createElement('div');
-        //     newPage.className = `page ${pageSize}`;
-        //     newPage.innerHTML = `
-        //         <div class="editable-content" contenteditable="true" id="page-${pageCount}"></div>
-        //         <div class="page-number">Page ${pageCount}</div>
-        //     `;
-
-        //     container.appendChild(newPage);
-        //     currentPage = pageCount;
-        //     document.getElementById(`page-${pageCount}`).focus();
-        // }
 
         function addNewPage() {
             pageCount++;
@@ -716,88 +917,6 @@
             }
         }
 
-
-
-        function changePageSize() {
-            const pageSize = document.getElementById('pageSize').value;
-            const pages = document.querySelectorAll('.page');
-            pages.forEach(page => {
-                page.className = `page ${pageSize}`;
-            });
-        }
-
-        function clearAll() {
-            if (confirm('Are you sure you want to clear all content?')) {
-                const container = document.getElementById('pages-container');
-                container.innerHTML = `
-                    <div class="page a4">
-                        <div class="editable-content" contenteditable="true" id="page-1"></div>
-                        <div class="page-number">Page 1</div>
-                    </div>
-                `;
-                currentPage = 1;
-                pageCount = 1;
-            }
-        }
-
-        async function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const pages = document.querySelectorAll('.page');
-            const pageSize = document.getElementById('pageSize').value;
-            const title = document.getElementById('pageTitle').value || 'document';
-
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: pageSize
-            });
-
-            for (let i = 0; i < pages.length; i++) {
-                if (i > 0) pdf.addPage();
-
-                const canvas = await html2canvas(pages[i], {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false
-                });
-
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = pageSize === 'a4' ? 210 : 216;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-            }
-
-            pdf.save(`${title}.pdf`);
-        }
-
-        async function exportToImage() {
-            const pages = document.querySelectorAll('.page');
-            const title = document.getElementById('pageTitle').value || 'document';
-
-            for (let i = 0; i < pages.length; i++) {
-                const canvas = await html2canvas(pages[i], {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false
-                });
-
-                const link = document.createElement('a');
-                link.download = `${title}-page-${i + 1}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }
-        }
-
-        // Track which page is being edited
-        document.addEventListener('click', (e) => {
-            const page = e.target.closest('.page');
-            if (page) {
-                const pageId = page.querySelector('.editable-content').id;
-                currentPage = parseInt(pageId.split('-')[1]);
-            }
-        });
-
         // Detect and handle overflow automatically
         function handlePageOverflow(pageEl) {
             const editable = pageEl.querySelector('.editable-content');
@@ -829,6 +948,70 @@
                 handlePageOverflow(page);
             }
         });
+
+        function changePageSize() {
+            const size = document.getElementById('pageSize').value;
+            const pages = document.querySelectorAll('.page');
+
+            pages.forEach(page => {
+                page.className = `page ${size}`;
+            });
+        }
+
+        function exportToPDF() {
+            if (isCodeView) {
+                alert('Please switch to Visual View before exporting');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pages = document.querySelectorAll('.page');
+            const title = document.getElementById('pageTitle').value || 'document';
+
+            let promises = [];
+            pages.forEach((page, index) => {
+                promises.push(
+                    html2canvas(page, { scale: 2 }).then(canvas => {
+                        return { canvas, index };
+                    })
+                );
+            });
+
+            Promise.all(promises).then(results => {
+                results.sort((a, b) => a.index - b.index);
+
+                results.forEach((result, index) => {
+                    if (index > 0) pdf.addPage();
+
+                    const imgData = result.canvas.toDataURL('image/png');
+                    const imgWidth = 210;
+                    const imgHeight = (result.canvas.height * imgWidth) / result.canvas.width;
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                });
+
+                pdf.save(`${title}.pdf`);
+            });
+        }
+
+        function exportToImage() {
+            if (isCodeView) {
+                alert('Please switch to Visual View before exporting');
+                return;
+            }
+
+            const pages = document.querySelectorAll('.page');
+            const title = document.getElementById('pageTitle').value || 'document';
+
+            pages.forEach((page, index) => {
+                html2canvas(page, { scale: 2 }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `${title}_page_${index + 1}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            });
+        }
 
 
     </script>
